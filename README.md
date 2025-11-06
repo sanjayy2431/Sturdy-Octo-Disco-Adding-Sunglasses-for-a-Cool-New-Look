@@ -36,6 +36,8 @@ plt.imshow(faceImage[:,:,::-1])
 plt.title("Face")
 plt.axis('off')
 ```
+![Uploading image.png…]()
+
 ```
 # Load sunglasses PNG (with transparency if available)
 glassPNG = cv2.imread("sunglass.png", cv2.IMREAD_UNCHANGED)
