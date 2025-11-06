@@ -57,6 +57,8 @@ plt.title("Sunglasses")
 plt.axis('off')
 plt.show()
 ```
+<img width="642" height="290" alt="image" src="https://github.com/user-attachments/assets/68e34cc0-2fc8-45d3-b0ce-d39c83b0c6e9" />
+
 ```
 plt.figure(figsize=[12,5])
 
