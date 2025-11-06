@@ -25,8 +25,10 @@ Welcome to Sturdy Octo Disco, a fun and creative project designed to overlay sun
 - Adding flair to your photos for fun.
 - Practicing computer vision workflows.
  # Program : 
+ ```
  Name : Sanjay v
  Reg No : 212223230188
+```
  ```
 import cv2
 import numpy as np
@@ -90,5 +92,16 @@ plt.subplot(121);plt.imshow(faceImage[:,:,::-1]); plt.title("Original Image");
 plt.subplot(122);plt.imshow(faceWithGlassesArithmetic[:,:,::-1]);plt.title("With Sunglasses");
 
 ```
+
+# Output : 
+<img width="433" height="450" alt="image" src="https://github.com/user-attachments/assets/4cef0f62-3902-44ab-8eda-08eb2accbd67" />
+<img width="487" height="533" alt="image" src="https://github.com/user-attachments/assets/33adcfef-7980-4857-8be9-e25458706834" />
+<img width="1345" height="543" alt="image" src="https://github.com/user-attachments/assets/adad4c51-486c-491e-afa5-d05c0028d432" />
+<img width="517" height="536" alt="image" src="https://github.com/user-attachments/assets/1e34012b-2859-4b72-b1be-1cfceae05ddf" />
+<img width="1760" height="537" alt="image" src="https://github.com/user-attachments/assets/8c5c8ca3-3ac2-4fbe-b32d-fb40508a3980" />
+<img width="830" height="398" alt="image" src="https://github.com/user-attachments/assets/b38bb01b-8619-4bc5-b91a-26158deb7851" />
+
+
+
 
 Feel free to fork, contribute, or customize this project for your creative needs!
