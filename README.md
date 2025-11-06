@@ -36,7 +36,8 @@ plt.imshow(faceImage[:,:,::-1])
 plt.title("Face")
 plt.axis('off')
 ```
-![Uploading image.png…]()
+<img width="395" height="571" alt="image" src="https://github.com/user-attachments/assets/bf16079c-fce3-47a5-b11e-d77439b8ebcb" />
+
 
 ```
 # Load sunglasses PNG (with transparency if available)
