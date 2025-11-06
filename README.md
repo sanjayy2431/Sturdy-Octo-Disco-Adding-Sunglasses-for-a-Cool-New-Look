@@ -75,6 +75,8 @@ plt.imshow(glassMask1, cmap='gray')
 plt.title('Sunglass Mask (generated)')
 plt.axis('off')
 ```
+<img width="1188" height="251" alt="image" src="https://github.com/user-attachments/assets/bc0c7698-c4be-4aa9-b400-41cb68db7deb" />
+
 ```
 import mediapipe as mp
 
