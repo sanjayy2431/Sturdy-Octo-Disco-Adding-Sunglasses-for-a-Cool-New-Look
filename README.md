@@ -25,74 +25,107 @@ Welcome to Sturdy Octo Disco, a fun and creative project designed to overlay sun
 - Adding flair to your photos for fun.
 - Practicing computer vision workflows.
  # Program : 
- ```
- Name : Sanjay v
- Reg No : 212223230188
 ```
- ```
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-faceImage = cv2.imread('ws.jpg')
-plt.imshow(faceImage[:,:,::-1]);plt.title("Face")
-
-
-faceImage.shape
-
-glassPNG = cv2.imread('sunglass.png',-1)
-plt.imshow(glassPNG[:,:,::-1]);plt.title("glassPNG")
-
-
-glassPNG = cv2.resize(glassPNG,(500,400))
-print("image Dimension ={}".format(glassPNG.shape))
-
-
-glassBGR = glassPNG[:,:,0:3]
-glassMask1 = glassPNG[:,:,3]
-
-
-plt.figure(figsize=[15,15])
-plt.subplot(121);plt.imshow(glassBGR[:,:,::-1]);plt.title('Sunglass Color channels');
-plt.subplot(122);plt.imshow(glassMask1,cmap='gray');plt.title('Sunglass Alpha channel');
-
-
-faceWithGlassesNaive = faceImage.copy()
-
-faceWithGlassesNaive[230:630,250:750]=glassBGR
-
-plt.imshow(faceWithGlassesNaive[...,::-1])
-
-
-glassMask = cv2.merge((glassMask1,glassMask1,glassMask1))
-
-glassMask = np.uint8(glassMask/255)
-
-faceWithGlassesArithmetic = faceImage.copy()
-
-eyeROI= faceWithGlassesArithmetic[230:630,250:750]
-
-maskedEye = cv2.multiply(eyeROI,(1-  glassMask ))
-
-maskedGlass = cv2.multiply(glassBGR,glassMask)
-
-eyeRoiFinal = cv2.add(maskedEye, maskedGlass)
-
-plt.figure(figsize=[20,20])
-plt.subplot(131);plt.imshow(maskedEye[...,::-1]);plt.title("Masked Eye Region")
-plt.subplot(132);plt.imshow(maskedGlass[...,::-1]);plt.title("Masked Sunglass Region")
-plt.subplot(133);plt.imshow(eyeRoiFinal[...,::-1]);plt.title("Augmented Eye and Sunglass")
-
-
-faceWithGlassesArithmetic[230:630,250:750]=eyeRoiFinal
-
-plt.figure(figsize=[20,20]);
-plt.subplot(121);plt.imshow(faceImage[:,:,::-1]); plt.title("Original Image");
-plt.subplot(122);plt.imshow(faceWithGlassesArithmetic[:,:,::-1]);plt.title("With Sunglasses");
-
+# Load face image
+faceImage = cv2.imread('my.jpg')
+plt.imshow(faceImage[:,:,::-1])
+plt.title("Face")
+plt.axis('off')
 ```
+```
+# Load sunglasses PNG (with transparency if available)
+glassPNG = cv2.imread("sunglass.png", cv2.IMREAD_UNCHANGED)
+print("Image shape:", glassPNG.shape)
 
+# Separate BGR and Alpha mask
+if glassPNG.shape[2] == 4:
+    glassBGR = glassPNG[:, :, :3]
+    glassMask1 = glassPNG[:, :, 3]
+else:
+    glassBGR = glassPNG
+    glassMask1 = 255 * np.ones(glassPNG.shape[:2], dtype=np.uint8)
+
+plt.imshow(cv2.cvtColor(glassBGR, cv2.COLOR_BGR2RGB))
+plt.title("Sunglasses")
+plt.axis('off')
+plt.show()
+```
+```
+plt.figure(figsize=[12,5])
+
+plt.subplot(1,2,1)
+plt.imshow(glassBGR[:,:,::-1])
+plt.title('Sunglass Color channels')
+plt.axis('off')
+
+glassGray = cv2.cvtColor(glassBGR, cv2.COLOR_BGR2GRAY)
+_, glassMask1 = cv2.threshold(glassGray, 240, 255, cv2.THRESH_BINARY_INV)
+
+plt.subplot(1,2,2)
+plt.imshow(glassMask1, cmap='gray')
+plt.title('Sunglass Mask (generated)')
+plt.axis('off')
+```
+```
+import mediapipe as mp
+
+mp_face = mp.solutions.face_mesh
+face_mesh = mp_face.FaceMesh(static_image_mode=True, max_num_faces=1)
+
+rgb_img = cv2.cvtColor(faceImage, cv2.COLOR_BGR2RGB)
+results = face_mesh.process(rgb_img)
+```
+```
+h, w, _ = faceImage.shape
+
+if results.multi_face_landmarks:
+    for face_landmarks in results.multi_face_landmarks:
+        left_eye = face_landmarks.landmark[33]
+        right_eye = face_landmarks.landmark[263]
+
+        x1, y1 = int(left_eye.x * w), int(left_eye.y * h)
+        x2, y2 = int(right_eye.x * w), int(right_eye.y * h)
+
+        eye_width = abs(x2 - x1)
+        new_w = int(eye_width * 2.0)
+        new_h = int(new_w * glassBGR.shape[0] / glassBGR.shape[1])
+
+        glass_resized = cv2.resize(glassBGR, (new_w, new_h))
+        mask_resized = cv2.resize(glassMask1, (new_w, new_h))
+
+        x = x1 - int(new_w * 0.25)
+        y = y1 - int(new_h * 0.4)
+
+        if x < 0: x = 0
+        if y < 0: y = 0
+        if x + new_w > w: new_w = w - x
+        if y + new_h > h: new_h = h - y
+
+        roi = faceImage[y:y+new_h, x:x+new_w]
+        mask_resized = mask_resized[:new_h, :new_w]
+        glass_resized = glass_resized[:new_h, :new_w]
+
+        mask_inv = cv2.bitwise_not(mask_resized)
+        mask_resized = cv2.merge([mask_resized]*3)
+        mask_inv = cv2.merge([mask_inv]*3)
+
+        bg = cv2.bitwise_and(roi, mask_inv)
+        fg = cv2.bitwise_and(glass_resized, mask_resized)
+        combined = cv2.add(bg, fg)
+
+        faceImage[y:y+new_h, x:x+new_w] = combined
+```
+```
+plt.figure(figsize=[10,10])
+plt.imshow(cv2.cvtColor(faceImage, cv2.COLOR_BGR2RGB))
+plt.title("Face with Sunglasses (Auto Aligned)")
+plt.axis("off")
+plt.show()
+```
 # Output : 
 
 <img width="433" height="450" alt="image" src="https://github.com/user-attachments/assets/4cef0f62-3902-44ab-8eda-08eb2accbd67" />
